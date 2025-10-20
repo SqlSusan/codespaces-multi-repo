@@ -58,8 +58,9 @@ if [ "${CODESPACES:-}" = "true" ]; then
     sudo sed -i -E 's/helper =.*//' /etc/gitconfig
 
     # Add one that just uses secrets available in the Codespace
-    # Prefer GITHUB_TOKEN/GITHUB_ACTOR, fall back to GH_TOKEN/GITHUB_USER
-    git config --global credential.helper '!f() { sleep 1; echo "username=${GITHUB_ACTOR:-${GITHUB_USER}}"; echo "password=${GITHUB_TOKEN:-${GH_TOKEN}}"; }; f'
+    # Prefer GH_TOKEN (user PAT) over GITHUB_TOKEN (workflow token) to avoid
+    # workflow-scoped tokens that may lack repo access; fall back to GITHUB_TOKEN.
+    git config --global credential.helper '!f() { sleep 1; echo "username=${GITHUB_ACTOR:-${GITHUB_USER}}"; echo "password=${GH_TOKEN:-${GITHUB_TOKEN}}"; }; f'
 fi
 
 if [ -f "${script_folder}/repos-to-clone.list" ]; then
